@@ -734,8 +734,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "digital-talent",
-          "value": "digital-talent"
+          "text": "<namespace>",
+          "value": "<namespace>"
         },
         "hide": 0,
         "includeAll": false,
@@ -745,11 +745,11 @@
         "options": [
           {
             "selected": true,
-            "text": "digital-talent",
-            "value": "digital-talent"
+            "text": "<namespace>",
+            "value": "<namespace>"
           }
         ],
-        "query": "digital-talent",
+        "query": "<namespace>",
         "skipUrlSync": false,
         "type": "custom"
       },
