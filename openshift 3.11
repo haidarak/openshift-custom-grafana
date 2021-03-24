@@ -1,0 +1,47 @@
+Openshift 3.11 how to create custom grafana 
+
+references : https://medium.com/@Awsompankaj/create-your-own-openshift-dashboard-in-grafana-ocp-3-11-f51545f3a22e
+
+- Create a new project 
+oc new-project <project-name>
+example : oc new-project my-monitoring
+
+- export grafana-datasources secret from openshift-monitoring 
+oc get secrets grafana-datasources -n openshift-monitoring --export -o yaml > <datasource-name>.yaml
+example : oc get secrets grafana-datasources -n openshift-monitoring --export -o yaml > grafana-datasources.yaml
+
+- create new grafana-datasources file for new grafana
+oc create -f <datasource-name>.yaml
+example : oc create -f grafana-datasources.yaml
+
+- create new grafana deployment
+oc new-app --name=<app-name> <grafana-docker-image-path>
+example : oc new-app --name=mydashboard docker.io/haidarak/grafana-mirror:5.4.3
+
+- add config to grafana
+oc set volume dc/<app-name> --add --name=<volume-name> --type=secret --secret-name=<secret-name> --mount-path=/etc/grafana/provisioning/datasources --namespace=<project-name>
+example : oc set volume dc/mydashboard --add --name=grafana-dashsources --type=secret --secret-name=grafana-datasources --mount-path=/etc/grafana/provisioning/datasources --namespace=my-monitoring
+
+oc set volume dc/<app-name> --add --name=<volume-name> --mount-path=/var/lib/grafana --namespace=<project-name>
+example : oc set volume dc/mydashboard --add --name=grafana-storage --mount-path=/var/lib/grafana --namespace=my-monitoring
+
+- add PV to grafana 
+-- Go to Storage
+-- Create storage
+-- Select storageclass, decide the name, use shared access mode (RWX) and specify the size
+-- Press create
+
+-- Go to deployments and select the application
+-- Go to Actions > Add Storage
+-- Delete the previous volume after note down the mount-path
+-- Select the storage created before, add /var/lib/grafana as mount path
+-- Decide the volume name and then add
+
+- expose services
+oc expose svc/<app-name>
+example : oc expose svc/mydashboard
+
+- join project to openshift-monitoring 
+oc adm pod-network join-projects --to=<project-name> openshift-monitoring
+example : oc adm pod-network join-projects --to=my-monitoring openshift-monitoring
+
